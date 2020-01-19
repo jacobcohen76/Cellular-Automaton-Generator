@@ -1,17 +1,29 @@
-package cellularautomaton;
+package drivers;
 
 import java.io.File;
 import java.net.URISyntaxException;
 
-public class GenerateSettings
+import cellularautomaton.CellularAutomaton;
+
+public class GenerateImage
 {
-	public static void main(String args[]) throws Exception
+	public static void main(String args[])
 	{
-		String rootDirectory = getJARdirectory();		
+		String rootDirectory = getJARdirectory();
 		String outputFolder = Global.outputFolderName;
 		
 		Settings settings = new Settings(rootDirectory, outputFolder);
-		settings.generateRules();
+		
+		try
+		{
+			settings.setMappedRules();
+			CellularAutomaton automaton = settings.getCellularAutomaton();
+			settings.saveImage(automaton.getBufferedImage(), "output.png");
+		}
+		catch (Exception ex)
+		{
+			settings.updateErrorLog(ex);
+		}
 	}
 	
 	private static String getJARdirectory()

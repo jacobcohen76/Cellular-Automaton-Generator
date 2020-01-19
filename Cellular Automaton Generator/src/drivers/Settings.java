@@ -1,4 +1,4 @@
-package cellularautomaton;
+package drivers;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
@@ -10,6 +10,12 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import javax.imageio.ImageIO;
+
+import cellularautomaton.Alphabet;
+import cellularautomaton.Cell;
+import cellularautomaton.CellularAutomaton;
+import cellularautomaton.Dictionary;
+import cellularautomaton.Row;
 
 /**
  * class Settings to be used to obtain user specified data and generate

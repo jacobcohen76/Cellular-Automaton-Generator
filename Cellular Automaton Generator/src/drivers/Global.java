@@ -1,4 +1,4 @@
-package cellularautomaton;
+package drivers;
 
 public class Global
 {

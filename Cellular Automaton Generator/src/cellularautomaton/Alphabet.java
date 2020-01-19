@@ -3,6 +3,11 @@ package cellularautomaton;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * class Alphabet used to define and map identifiers to Cells with specified rgbValues
+ * 
+ * @author Jacob Cohen
+ */
 public class Alphabet
 {
 	private ArrayList<Cell> setOfCells;
@@ -17,6 +22,11 @@ public class Alphabet
 		idMap = new HashMap<String, Cell>();
 	}
 	
+	/**
+	 * sets this Alphabet to associate NULL with the specified rgbValue
+	 * 
+	 * @param newNULLrgbVal the rgbValue to associate NULL values with
+	 */
 	public void setNULL(int newNULLrgbVal)
 	{
 		if(rgbMap.containsKey(newNULLrgbVal))
@@ -32,6 +42,14 @@ public class Alphabet
 		}
 	}
 	
+	/**
+	 * Adds the Cell to this Alphabet, will throw an error if a Cell with matching rgbValue or identifier
+	 * already exists in this Alphabet
+	 * 
+	 * @param toAdd the Cell to add to this Alphabet
+	 * @throws Exception throws an Exception if a Cell with a matching identifier or rgbValue already
+	 * exists in this Alphabet
+	 */
 	public void add(Cell toAdd) throws Exception
 	{
 		if(rgbMap.put(toAdd.rgbValue, toAdd) != null || idMap.put(toAdd.id, toAdd) != null)
@@ -40,11 +58,21 @@ public class Alphabet
 		setOfCells.add(toAdd);
 	}
 	
+	/**
+	 * Gets the Cell in this Alphabet with an identifier that matches the specified identifier
+	 * 
+	 * @param id the identifier of the Cell to get
+	 * @return the Cell with an identifier that matches the specified identifier
+	 */
 	public Cell get(String id)
 	{
 		return idMap.get(id);
 	}
 	
+	/**
+	 * gets the Collection of all the Cells within this Alphabet
+	 * @return the Collection of all the Cells within this Alphabet
+	 */
 	public ArrayList<Cell> getSetOfCells()
 	{
 		return setOfCells;

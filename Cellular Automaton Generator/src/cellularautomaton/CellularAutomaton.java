@@ -4,6 +4,11 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.Iterator;
 
+/**
+ * 
+ * 
+ * @author Jacob Cohen
+ */
 public class CellularAutomaton implements Iterable<Row>
 {
 	private Row rows[];
