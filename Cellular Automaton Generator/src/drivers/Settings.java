@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -19,7 +20,7 @@ import cellularautomaton.Row;
 
 /**
  * class Settings to be used to obtain user specified data and generate
- * appropriate CellularAutomaton
+ * the appropriate corresponding CellularAutomaton
  * 
  * @author Jacob Cohen
  */
@@ -62,16 +63,25 @@ public class Settings
 		this.initialize();
 	}
 	
-	public void saveImage(BufferedImage image, String filename)
+	public void saveImage(BufferedImage image)
+	{
+		String fileName = (new Timestamp(System.currentTimeMillis())).toString().replace('.', '-').replace(':', '.') + ".png";
+		saveImage(image, fileName);
+	}
+	
+	public void saveImage(BufferedImage image, String fileName)
 	{
 		try
 		{
-			File f = new File(rootDirectory + outputFolder + filename);
+			File f = new File(rootDirectory + outputFolder + fileName);
 			
 			if(f.getParentFile() != null && !f.getParentFile().exists())
 				f.getParentFile().mkdirs();
 			
-			ImageIO.write(image, "png", f);
+			if(!f.exists())
+				ImageIO.write(image, "png", f);
+			else
+				throw new Exception("ERROR THE FILE (" + fileName + ") ALREADY EXISTS");
 		}
 		catch (Exception ex)
 		{
@@ -278,5 +288,37 @@ public class Settings
 		
 		scan.close();
 		return alphabet;
+	}
+	
+	
+	
+	public void setMappedRules(ArrayList<Integer> outputMap) throws Exception
+	{
+		int current = 0;
+		Scanner scan = new Scanner(rulesTXT);
+		
+		ArrayList<Cell> setOfCells = alphabet.getSetOfCells();
+		
+		while(scan.hasNext())
+		{
+			Cell[] pattern = new Cell[ruleSize];
+			
+			int i = 0;
+			while(i < ruleSize)
+			{
+				pattern[i] = alphabet.get(scan.next());
+				i++;
+			}
+			
+			//skip past "->" and mapped output
+			scan.next();
+			scan.next();
+			
+			Cell output = setOfCells.get(outputMap.get(current));
+			current++;			
+			dictionary.remap(pattern, output);
+		}
+		
+		scan.close();
 	}
 }

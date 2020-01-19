@@ -4,7 +4,8 @@ import java.util.Iterator;
 
 /**
  * Row is an Object that will be used to model a row of
- * cells found in a CellularAutomaton.
+ * cells found in a CellularAutomaton, and iterate through
+ * them to get the pattern used to generate the row below it
  * 
  * @author Jacob Cohen
  */
@@ -13,12 +14,24 @@ public class Row implements Iterable<Cell[]>
 	private Cell[] cells;
 	private int patternSize;
 	
+	/**
+	 * Creates a Row with specified Cells, and patternSize to use when generating a new Row
+	 * 
+	 * @param cells the Cells to initialize this Row with
+	 * @param patternSize the size to set the custom iterator to
+	 */
 	public Row(Cell[] cells, int patternSize)
 	{
 		this.cells = cells;
 		this.patternSize = patternSize;
 	}
 	
+	/**
+	 * Creates a Row with specified number of Columns, and patternSize to use when generating a new Row
+	 * 
+	 * @param numColumns the number of columns this Row should have
+	 * @param patternSize the size to set the custom iterator to
+	 */
 	public Row(int numColumns, int patternSize)
 	{
 		cells = new Cell[numColumns];
@@ -45,20 +58,34 @@ public class Row implements Iterable<Cell[]>
 	 * rules defined in the given dictionary
 	 */
 	public static Row generate(Row parent, Dictionary dictionary)
-	{
+	{		
 		Row generatedRow = new Row(parent.size(), parent.patternSize);
 		
+		//the current index of the Cell being generated in the generatedRow
 		int i = 0;
+		
+		//uses custom iterator for the class Row to get the pattern at the current index  
 		for(Cell[] pattern : parent)
 		{
+			//replaces nulls obtained from out of bounds index (if any), with the fake NULL value
+			//specified by the alphabet that was used to generate the rules in the provided dictionary
 			replaceNULL(pattern, dictionary.getNULL());
+			
+			//gets the output that the current pattern maps to as specified by the provided dictionary
 			generatedRow.set(i, dictionary.getOutput(pattern));
+			
 			i++;
 		}
 		
 		return generatedRow;
 	}
 	
+	/**
+	 * Replaces null values in a pattern with the specified Cell newNULL
+	 * 
+	 * @param pattern the pattern of Cells to replace the null values of
+	 * @param newNULL the Cell to replace the null values with
+	 */
 	private static void replaceNULL(Cell[] pattern, Cell newNULL)
 	{
 		for(int i = 0; i < pattern.length; i++)
@@ -68,11 +95,25 @@ public class Row implements Iterable<Cell[]>
 		}
 	}
 	
+	/**
+	 * used to check if a Cell index is or is not within the boundaries of this Row
+	 * 
+	 * @param index the Cell index to Check if it is or is not within the boundaries of this Row
+	 * @return TRUE if the Cell index is within the boundaries of this Row, and
+	 * FALSE if the Cell index is outside of the boundaries of this Row
+	 */
 	private boolean insideBounds(int index)
 	{
 		return 0 <= index && index < cells.length;
 	}
 	
+	/**
+	 * Returns the Cell located at the specified Cell index
+	 * 
+	 * @param index the index of this Row to get the Cell of
+	 * @return the Cell located at the specified Cell index, but if the specified Cell index
+	 * is outside of the boundaries of this Row, returns null instead
+	 */
 	public Cell get(int index)
 	{
 		Cell tmp = null;
@@ -83,6 +124,13 @@ public class Row implements Iterable<Cell[]>
 		return tmp;
 	}
 	
+	/**
+	 * Sets the Cell at the specified Cell index to the specified Cell
+	 * 
+	 * @param index the specified Cell index to set
+	 * @param cell the Cell to set the specified Cell index to
+	 * @return the Cell that was previously stored at the specified Cell index
+	 */
 	public Cell set(int index, Cell cell)
 	{
 		Cell temp = null;
@@ -96,6 +144,22 @@ public class Row implements Iterable<Cell[]>
 		return temp;
 	}
 	
+	/**
+	 * class PatternIterator to be used to iterate through a Row, starting at centerIndex 0
+	 * will return an array of Cells with length equal to the patternSize specified
+	 * by the Row class associated with it, until it reaches the ending index.
+	 * <br><br>
+	 * for example if you had a Row that looked as follows
+	 * <br><br>
+	 * {W, W, W, B, W, W, W}
+	 * <br><br>
+	 * and the patternSize of said Row was = to 3, starting at the centerIndex 0, the
+	 * returned Cell arrays by this iterator would be as follows
+	 * <br><br>
+	 * {null, W, W}, {W, W, W}, {W, W, B}, {W, B, W}, {B, W, W}, {W, W, W}, {W, W, null}
+	 * 
+	 * @author Jacob Cohen
+	 */
 	private class PatternIterator implements Iterator<Cell[]>
 	{
 		private int centerIndex;
@@ -132,8 +196,10 @@ public class Row implements Iterable<Cell[]>
 	public String toString()
 	{
 		String str = "";
+		
 		for(Cell cell : cells)
 			str += cell + " ";
+		
 		return str;
 	}
 }

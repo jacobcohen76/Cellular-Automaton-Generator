@@ -10,10 +10,20 @@ import java.util.HashMap;
  */
 public class Alphabet
 {
+	/**
+	 * to store the set of all the Cells contained within this Alphabet
+	 */
 	private ArrayList<Cell> setOfCells;
+	
+	/**
+	 * to map an rgbValue to a Cell
+	 */
 	private HashMap<Integer, Cell> rgbMap;
+	
+	/**
+	 * to map an identifier to a Cell
+	 */
 	private HashMap<String, Cell> idMap;
-	private Cell NULL;
 	
 	public Alphabet()
 	{
@@ -26,20 +36,19 @@ public class Alphabet
 	 * sets this Alphabet to associate NULL with the specified rgbValue
 	 * 
 	 * @param newNULLrgbVal the rgbValue to associate NULL values with
+	 * @throws Exception 
 	 */
-	public void setNULL(int newNULLrgbVal)
+	public void setNULL(int newNULLrgbVal) throws Exception
 	{
 		if(rgbMap.containsKey(newNULLrgbVal))
-		{
-			NULL = rgbMap.get(newNULLrgbVal);
-			idMap.put("NULL", NULL);
-		}
+			idMap.put("NULL", rgbMap.get(newNULLrgbVal));
 		else
-		{
-			NULL = new Cell("NULL", newNULLrgbVal);
-			idMap.put("NULL", NULL);
-			rgbMap.put(newNULLrgbVal, NULL);
-		}
+			throw new Exception(""
+					+ "Error, NULL must be mapped to an rgbValue that is already mapped to an identifier in this Alphabet,\n"
+					+ "your defined rgbValue (" + Integer.toString(newNULLrgbVal, 16) + ") is not an element in your alphabet,\n"
+					+ "to be more clear, please define the rgbValue of NULL to be one of the following Hexadecimal RGB values in\n"
+					+ "the file \"settings.txt\",\n\n"
+					+  this);
 	}
 	
 	/**
@@ -76,6 +85,11 @@ public class Alphabet
 	public ArrayList<Cell> getSetOfCells()
 	{
 		return setOfCells;
+	}
+	
+	public Cell get(int index)
+	{
+		return setOfCells.get(index);
 	}
 	
 	public String toString()

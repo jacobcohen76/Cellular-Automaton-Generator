@@ -5,7 +5,12 @@ import java.awt.image.BufferedImage;
 import java.util.Iterator;
 
 /**
- * 
+ * class CellularAutomaton to model and represent a Cellular Automaton,
+ * needs a starting Row, a number of Rows, and a Dictionary that defines
+ * the rules of how the other Rows will be generated based off the previous row,
+ * given this information will fill out an Array based data structure containing
+ * rows of Cells, which can then be turned into a ".png" image depending on the
+ * rgbValues of the Cells contained within this CellularAutomaton
  * 
  * @author Jacob Cohen
  */
@@ -17,6 +22,13 @@ public class CellularAutomaton implements Iterable<Row>
 	private int numRows;
 	private int numColumns;
 	
+	/**
+	 * constructs a new CellularAutonoma with specified starting row, row count, and rules to generate with
+	 * 
+	 * @param startingRow the starting Row that will be used to generate all of the other Rows in this CellularAutonoma
+	 * @param numRows the number of Rows to make this CellularAutonoma have when generated
+	 * @param dictionary contains the information on how to generate the other Rows in this CellularAutonoma
+	 */
 	public CellularAutomaton(Row startingRow, int numRows, Dictionary dictionary)
 	{
 		rows = new Row[numRows];
@@ -29,8 +41,8 @@ public class CellularAutomaton implements Iterable<Row>
 	}
 	
 	/**
-	 * Generates and sets all of the Rows in this
-	 * CellularAutomaton based on the previous Row
+	 * Generates and sets all of the Rows and Cells within this
+	 * CellularAutomaton based on the provided startingRow
 	 */
 	public void generate()
 	{
@@ -38,6 +50,12 @@ public class CellularAutomaton implements Iterable<Row>
 			rows[i] = Row.generate(rows[i - 1], dictionary);
 	}
 	
+	/**
+	 * Returns true if the specified index is a valid Row index of this CellularAutomaton
+	 * 
+	 * @param index the Row index to check if it is valid
+	 * @return if the Row at specified index is or is not within the boundaries of this CellularAutomaton
+	 */
 	private boolean insideBounds(int index)
 	{
 		return 0 <= index && index < rows.length;
@@ -60,7 +78,6 @@ public class CellularAutomaton implements Iterable<Row>
 		
 		return row;
 	}
-	
 	
 	/**
 	 * Gets the Cell at the specified row and column indices. Will return null if
@@ -85,7 +102,7 @@ public class CellularAutomaton implements Iterable<Row>
 	
 	/**
 	 * class RowIterator to be used to iterate through
-	 * the Rows of this CellularAutomaton
+	 * all of the Rows of this CellularAutomaton
 	 * 
 	 * @author Jacob Cohen
 	 */

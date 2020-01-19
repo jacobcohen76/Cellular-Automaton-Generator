@@ -7,8 +7,8 @@ package cellularautomaton;
  * 
  * @author Jacob Cohen
  */
-public class Cell
-{	
+public class Cell implements Comparable<Cell>
+{
 	public int rgbValue;
 	public String id;
 	
@@ -21,5 +21,17 @@ public class Cell
 	public String toString()
 	{
 		return id;
+	}
+
+	public int compareTo(Cell o)
+	{
+		int val = 0;
+		
+		if(rgbValue < o.rgbValue)
+			val = -1;
+		else if(rgbValue > o.rgbValue)
+			val = +1;
+		
+		return val;
 	}
 }

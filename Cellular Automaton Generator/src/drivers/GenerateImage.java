@@ -5,6 +5,13 @@ import java.net.URISyntaxException;
 
 import cellularautomaton.CellularAutomaton;
 
+/**
+ * class GenerateImage to act as a driver for the runnable Jar that when executed
+ * will get the information from text files and generate the CellularAutomaton
+ * based on user chosen specifications to the output folder. 
+ * 
+ * @author Jacob Cohen
+ */
 public class GenerateImage
 {
 	public static void main(String args[])
@@ -18,7 +25,7 @@ public class GenerateImage
 		{
 			settings.setMappedRules();
 			CellularAutomaton automaton = settings.getCellularAutomaton();
-			settings.saveImage(automaton.getBufferedImage(), "output.png");
+			settings.saveImage(automaton.getBufferedImage());
 		}
 		catch (Exception ex)
 		{
@@ -26,6 +33,11 @@ public class GenerateImage
 		}
 	}
 	
+	/**
+	 * Returns the String path to the directory location of the Jar file this is being run on
+	 * 
+	 * @return the directory location of the Jar file being run from
+	 */
 	private static String getJARdirectory()
 	{
 		try {

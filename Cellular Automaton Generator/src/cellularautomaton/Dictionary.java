@@ -15,15 +15,33 @@ import java.util.Set;
  */
 public class Dictionary
 {
+	/**
+	 * Contains the set of all possible Cells that can appear in rules for this Dictionary
+	 */
 	private Alphabet alphabet;
-	private int ruleSize;
 	
+	/**
+	 * the size that the patterns that an output will map to in order to define a rule will be
+	 */
+	private int patternSize;
+	
+	/**
+	 * to map a unique String key associated with a unique permutation of Cells
+	 * contained in the alphabet for this Dictionary to a Cell output to define
+	 * a rule in this Dictionary
+	 */
 	private HashMap<String, Cell> outputMap;
 	
-	public Dictionary(Alphabet alphabet, int ruleSize)
+	/**
+	 * Creates a dictionary with specified alphabet and patternSize
+	 * 
+	 * @param alphabet the alphabet this Dictionary will use
+	 * @param patternSize the patternSize this Dictionary will use
+	 */
+	public Dictionary(Alphabet alphabet, int patternSize)
 	{
 		this.alphabet = alphabet;
-		this.ruleSize = ruleSize;
+		this.patternSize = patternSize;
 		
 		outputMap = new HashMap<String, Cell>();
 	}
@@ -85,10 +103,10 @@ public class Dictionary
 		Scanner scan = new Scanner(file);
 		while(scan.hasNext())
 		{
-			Cell[] pattern = new Cell[ruleSize];
+			Cell[] pattern = new Cell[patternSize];
 			
 			int i = 0;
-			while(i < ruleSize)
+			while(i < patternSize)
 			{
 				pattern[i] = alphabet.get(scan.next());
 				i++;
@@ -102,6 +120,11 @@ public class Dictionary
 		}
 		
 		scan.close();
+	}
+	
+	public void remap(Cell[] pattern, Cell output)
+	{
+		outputMap.put(getKey(pattern), output);
 	}
 	
 	/**
@@ -137,7 +160,7 @@ public class Dictionary
 	
 	/**
 	 * Writes all the possible permutations of patterns that could occur in
-	 * a CellularAutomaton with the matching Alphabet of Cells, and ruleSize. 
+	 * a CellularAutomaton with the matching Alphabet of Cells, and patternSize. 
 	 *  
 	 * @param output the file to write permutations to.
 	 * @throws Exception if there is a problem writing to file specified by output
@@ -152,8 +175,13 @@ public class Dictionary
 			set[i] = list.get(i).toString();
 		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(output));
-		permute(set, "", set.length, ruleSize, bw);
+		permute(set, "", set.length, patternSize, bw);
 		bw.close();
+	}
+	
+	public Set<String> getAllKeys()
+	{
+		return outputMap.keySet();
 	}
 	
 	public String toString()
