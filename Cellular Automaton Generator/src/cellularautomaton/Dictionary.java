@@ -32,6 +32,8 @@ public class Dictionary
 	 */
 	private HashMap<String, Cell> outputMap;
 	
+	private ArrayList<String> keyList;
+	
 	/**
 	 * Creates a dictionary with specified alphabet and patternSize
 	 * 
@@ -44,6 +46,7 @@ public class Dictionary
 		this.patternSize = patternSize;
 		
 		outputMap = new HashMap<String, Cell>();
+		keyList = new ArrayList<String>();
 	}
 	
 	/**
@@ -116,7 +119,9 @@ public class Dictionary
 			scan.next();
 			
 			Cell output = alphabet.get(scan.next());
+			String key = getKey(pattern);
 			outputMap.put(getKey(pattern), output);
+			keyList.add(key);
 		}
 		
 		scan.close();
@@ -125,6 +130,17 @@ public class Dictionary
 	public void remap(Cell[] pattern, Cell output)
 	{
 		outputMap.put(getKey(pattern), output);
+	}
+	
+	public void remap(ArrayList<Integer> ruleNumber)
+	{
+		ArrayList<Cell> setOfCells = alphabet.getSetOfCells();
+		int i = 0;
+		for(String key : keyList)
+		{
+			outputMap.put(key, setOfCells.get(ruleNumber.get(i)));
+			i++;
+		}
 	}
 	
 	/**

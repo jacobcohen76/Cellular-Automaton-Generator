@@ -1,6 +1,5 @@
 package cellularautomaton;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.Iterator;
 
@@ -146,7 +145,7 @@ public class CellularAutomaton implements Iterable<Row>
 		{
 			for(int j = 0; j < image.getHeight(); j++)
 			{
-				image.setRGB(i, j, new Color(get(j, i).rgbValue).getRGB());
+				image.setRGB(i, j, get(j, i).getRGB());
 			}
 		}
 		

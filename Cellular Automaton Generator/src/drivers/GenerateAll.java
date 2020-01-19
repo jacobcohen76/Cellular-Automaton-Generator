@@ -18,6 +18,13 @@ public class GenerateAll
 		
 		settings = new Settings(rootDirectory, outputFolder);
 		
+		try {
+			settings.setMappedRules();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		ArrayList<Cell> setOfCells = settings.alphabet.getSetOfCells();
 		
 		int radix = setOfCells.size();
@@ -59,12 +66,12 @@ public class GenerateAll
 	private static void generate(ArrayList<Integer> ruleNumber, int base10)
 	{
 		try {
-			settings.setMappedRules(ruleNumber);
+			settings.dictionary.remap(ruleNumber);
 			CellularAutomaton automaton = settings.getCellularAutomaton();
 			settings.saveImage(automaton.getBufferedImage(), base10 + ".png");
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception ex)
+		{
+			settings.updateErrorLog(ex);
 		}
 	}
 	
