@@ -13,66 +13,65 @@ public class GenerateAll
 	
 	public static void main(String args[])
 	{
-		String rootDirectory = getJARdirectory();
-		String outputFolder = Global.outputFolderName;
-		
-		settings = new Settings(rootDirectory, outputFolder);
-		
-		try {
-			settings.setMappedRules();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		ArrayList<Cell> setOfCells = settings.alphabet.getSetOfCells();
-		
-		int radix = setOfCells.size();
-		int ruleSize = settings.ruleSize;
-		
-		int numOutputs = (int) Math.pow(radix, ruleSize);
-		int numPossibleOutputMaps = (int) Math.pow(radix, numOutputs);
-		
-		ArrayList<Integer> outputMap = new ArrayList<Integer>(numOutputs);
-		for(int i = 0; i < numOutputs; i++)
-			outputMap.add(0);
-		
-		for(int i = 0; i < numPossibleOutputMaps; i++)
+		try
 		{
-			rebase(i, radix, outputMap);
-			generate(outputMap, i);
+			String rootDirectory = getJARdirectory();
+			String outputFolder = Global.outputFolderName;
+			
+			settings = new Settings(rootDirectory, outputFolder);
+			
+			settings.generateRules();
+			settings.setMappedRules();
+			settings.setStartingRow();
+			
+			ArrayList<Cell> setOfCells = settings.alphabet.getSetOfCells();
+			
+			int radix = setOfCells.size();
+			int ruleSize = settings.ruleSize;
+			
+			int numOutputs = (int) Math.pow(radix, ruleSize);
+			long numPossibleOutputMaps = (long) Math.pow(radix, numOutputs);
+			
+			ArrayList<Integer> radixBasedRuleSet = new ArrayList<Integer>(numOutputs);
+			for(int i = 0; i < numOutputs; i++)
+				radixBasedRuleSet.add(0);
+			
+			for(long i = 0; i < numPossibleOutputMaps; i++)
+			{
+				rebase(i, radix, radixBasedRuleSet);
+				generate(radixBasedRuleSet, i);
+			}
+		}
+		catch(Exception ex)
+		{
+			settings.updateErrorLog(ex);
 		}
 	}
 	
-	private static void rebase(int n, int radix, ArrayList<Integer> number)
+	private static void rebase(long n, int radix, ArrayList<Integer> abnormalRadixBasedNumber)
 	{
-		reset(number);
+		reset(abnormalRadixBasedNumber);
 		
 		int i = 0;
 		while(n > 0)
 		{
-			number.set(i, n % radix);
+			abnormalRadixBasedNumber.set(i, (int) (n % radix));
 			n /= radix;
 			i++;
 		}
 	}
 	
-	private static void reset(ArrayList<Integer> number)
+	private static void reset(ArrayList<Integer> abnormalRadixBasedNumber)
 	{
-		for(int i = 0; i < number.size(); i++)
-			number.set(i, 0);
+		for(int i = 0; i < abnormalRadixBasedNumber.size(); i++)
+			abnormalRadixBasedNumber.set(i, 0);
 	}
 		
-	private static void generate(ArrayList<Integer> ruleNumber, int base10)
+	private static void generate(ArrayList<Integer> ruleNumber, long base10) throws Exception
 	{
-		try {
-			settings.dictionary.remap(ruleNumber);
-			CellularAutomaton automaton = settings.getCellularAutomaton();
-			settings.saveImage(automaton.getBufferedImage(), base10 + ".png");
-		} catch (Exception ex)
-		{
-			settings.updateErrorLog(ex);
-		}
+		settings.dictionary.remap(ruleNumber);
+		CellularAutomaton automaton = settings.getCellularAutomaton();
+		settings.saveImage(automaton.getBufferedImage(), base10 + ".png");
 	}
 	
 	/**

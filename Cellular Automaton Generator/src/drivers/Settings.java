@@ -56,6 +56,8 @@ public class Settings
 	public int nullRGBval;
 	public int numRows; 
 	
+	public Row startingRow;
+	
 	public Settings(String rootDirectory, String outputFolder)
 	{
 		this.rootDirectory = rootDirectory;
@@ -78,10 +80,7 @@ public class Settings
 			if(f.getParentFile() != null && !f.getParentFile().exists())
 				f.getParentFile().mkdirs();
 			
-			if(!f.exists())
-				ImageIO.write(image, "png", f);
-			else
-				throw new Exception("ERROR THE FILE (" + fileName + ") ALREADY EXISTS");
+			ImageIO.write(image, "png", f);
 		}
 		catch (Exception ex)
 		{
@@ -97,6 +96,8 @@ public class Settings
 		rulesTXT = new File(rootDirectory + rulesFileName);
 		rowTXT = new File(rootDirectory + startingRowFileName);
 		errorlogTXT = new File(rootDirectory + errorlogFileName);
+		
+		startingRow = null;
 		
 		try
 		{
@@ -152,10 +153,13 @@ public class Settings
 			
 			PrintWriter pw = new PrintWriter(errorlogTXT);
 			pw.write(LocalDateTime.now().toString() + "\n");
-			ex.printStackTrace(pw);
+			pw.write(ex.getLocalizedMessage());
 			pw.close();
 		}
 		catch (Exception e) {}
+		
+		//terminates the program
+		System.exit(0);
 	}
 	
 	/**
@@ -165,11 +169,23 @@ public class Settings
 	 * @throws Exception throws an Exception if there is a problem when getting the startingRow specifed in file "startingRow.txt"
 	 */
 	public CellularAutomaton getCellularAutomaton() throws Exception
-	{
-		Row startingRow = getStartingRow();
+	{		
+		CellularAutomaton cellularAutomaton = new CellularAutomaton(numRows);
+		cellularAutomaton.generate(startingRow, dictionary);
 		
-		CellularAutomaton cellularAutomaton = new CellularAutomaton(startingRow, numRows, dictionary);
-		cellularAutomaton.generate();
+		return cellularAutomaton;
+	}
+	
+	/**
+	 * Generates a CellularAutomaton based on the dictionary of rules provided in the parameter
+	 * 
+	 * @return a new CellularAutomaton that matches the specifications provided by this
+	 * @throws Exception throws an Exception if there is a problem when getting the startingRow specifed in file "startingRow.txt"
+	 */
+	public CellularAutomaton getCellularAutomaton(Dictionary dictionary) throws Exception
+	{		
+		CellularAutomaton cellularAutomaton = new CellularAutomaton(numRows);
+		cellularAutomaton.generate(startingRow, dictionary);
 		
 		return cellularAutomaton;
 	}
@@ -214,10 +230,25 @@ public class Settings
 		
 		scan.close();
 		
+		if(list.size() <= 0)
+			throw new Exception("Error, you need to initialize your starting row in the \"rows.txt\" file");
+		
 		Cell[] listArray = new Cell[list.size()];
 		listArray = list.toArray(listArray);
 		
 		return new Row(listArray, ruleSize);
+	}
+	
+	public void setStartingRow()
+	{
+		try
+		{
+			startingRow = getStartingRow();
+		}
+		catch(Exception ex)
+		{
+			updateErrorLog(ex);
+		}
 	}
 	
 	/**
@@ -232,27 +263,38 @@ public class Settings
 			write(defaultSettings, settingsTXT);
 		}
 		
-		Scanner scan = new Scanner(settingsTXT);
-		
-		//skip past variable name and '='
-		scan.next();
-		scan.next();
-		
-		ruleSize = scan.nextInt();
-		
-		//skip past variable name and '='
-		scan.next();
-		scan.next();
-		
-		nullRGBval = scan.nextInt(16);
-		
-		//skip past variable name and '='
-		scan.next();
-		scan.next();
-		
-		numRows = scan.nextInt();
-		
-		scan.close();
+		try
+		{
+			Scanner scan = new Scanner(settingsTXT);
+			
+			//skip past variable name and '='
+			scan.next();
+			scan.next();
+			
+			ruleSize = scan.nextInt();
+			
+			//skip past variable name and '='
+			scan.next();
+			scan.next();
+			
+			nullRGBval = scan.nextInt(16);
+			
+			//skip past variable name and '='
+			scan.next();
+			scan.next();
+			
+			numRows = scan.nextInt();
+			
+			scan.close();
+		}
+		catch(Exception ex)
+		{
+			throw new Exception(""
+					+ "Error, your \"settings.txt\" file contains invalid settings,\n"
+					+ "try deleting your \"settings.txt\" and re-generating your\n"
+					+ "settings files with the \"GenerateSettings.jar\" file in\n"
+					+ "order to reset your settings to their default values.");
+		}
 	}
 	
 	/**
@@ -290,35 +332,31 @@ public class Settings
 		return alphabet;
 	}
 	
-	
-	
-	public void setMappedRules(ArrayList<Integer> outputMap) throws Exception
+	/**
+	 * Returns the number of rules defined in the "rules.txt" file
+	 * 
+	 * @return the number of rules defined in the "rules.txt" file
+	 * @throws Exception if the file "rules.txt" is not found, but
+	 * this should never occur
+	 */
+	public int getNumRules() throws Exception
 	{
-		int current = 0;
-		Scanner scan = new Scanner(rulesTXT);
+		int numRules = 0;
 		
-		ArrayList<Cell> setOfCells = alphabet.getSetOfCells();
-		
-		while(scan.hasNext())
+		try
 		{
-			Cell[] pattern = new Cell[ruleSize];
+			Scanner scan = new Scanner(rulesTXT);
 			
-			int i = 0;
-			while(i < ruleSize)
-			{
-				pattern[i] = alphabet.get(scan.next());
-				i++;
-			}
+			while(scan.hasNextLine())
+				numRules++;
 			
-			//skip past "->" and mapped output
-			scan.next();
-			scan.next();
-			
-			Cell output = setOfCells.get(outputMap.get(current));
-			current++;			
-			dictionary.remap(pattern, output);
+			scan.close();
+		}
+		catch(Exception ex)
+		{
+			throw new Exception("Error, the file \"" + rulesFileName + "\" is missing from your Cellular Autonoma Generator's root directory.");
 		}
 		
-		scan.close();
+		return numRules;
 	}
 }

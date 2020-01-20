@@ -12,13 +12,22 @@ import java.net.URISyntaxException;
  */
 public class GenerateSettings
 {
-	public static void main(String args[]) throws Exception
+	private static Settings settings;
+	
+	public static void main(String args[])
 	{
-		String rootDirectory = getJARdirectory();		
-		String outputFolder = Global.outputFolderName;
-		
-		Settings settings = new Settings(rootDirectory, outputFolder);
-		settings.generateRules();
+		try
+		{
+			String rootDirectory = getJARdirectory();		
+			String outputFolder = Global.outputFolderName;
+			
+			settings = new Settings(rootDirectory, outputFolder);
+			settings.generateRules();
+		}
+		catch(Exception ex)
+		{
+			settings.updateErrorLog(ex);
+		}
 	}
 	
 	/**

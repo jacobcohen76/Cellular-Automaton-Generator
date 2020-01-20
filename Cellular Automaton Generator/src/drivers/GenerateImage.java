@@ -14,17 +14,22 @@ import cellularautomaton.CellularAutomaton;
  */
 public class GenerateImage
 {
+	private static Settings settings;
+	
 	public static void main(String args[])
 	{
-		String rootDirectory = getJARdirectory();
-		String outputFolder = Global.outputFolderName;
-		
-		Settings settings = new Settings(rootDirectory, outputFolder);
-		
 		try
 		{
+			String rootDirectory = getJARdirectory();
+			String outputFolder = Global.outputFolderName;
+			
+			settings = new Settings(rootDirectory, outputFolder);
+			
 			settings.setMappedRules();
+			settings.setStartingRow();
+			
 			CellularAutomaton automaton = settings.getCellularAutomaton();
+			
 			settings.saveImage(automaton.getBufferedImage());
 		}
 		catch (Exception ex)

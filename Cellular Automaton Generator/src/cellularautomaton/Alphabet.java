@@ -33,21 +33,30 @@ public class Alphabet
 	}
 	
 	/**
+	 * Returns the number of unique Cells in this Alphabet
+	 * @return the number of unique Cells in this Alphabet
+	 */
+	public int numCells()
+	{
+		return setOfCells.size();
+	}
+	
+	/**
 	 * sets this Alphabet to associate NULL with the specified rgbValue
 	 * 
 	 * @param newNULLrgbVal the rgbValue to associate NULL values with
 	 * @throws Exception 
 	 */
 	public void setNULL(int newNULLrgbVal) throws Exception
-	{
+	{		
 		if(rgbMap.containsKey(newNULLrgbVal))
 			idMap.put("NULL", rgbMap.get(newNULLrgbVal));
 		else
-			throw new Exception(""
+			throw new Exception( ""
 					+ "Error, NULL must be mapped to an rgbValue that is already mapped to an identifier in this Alphabet,\n"
-					+ "your defined rgbValue (" + Integer.toString(newNULLrgbVal, 16) + ") is not an element in your alphabet,\n"
+					+ "your defined rgbValue (" + Integer.toString(newNULLrgbVal, 16) + ") is not mapped to an element in your alphabet,\n"
 					+ "to be more clear, please define the rgbValue of NULL to be one of the following Hexadecimal RGB values in\n"
-					+ "the file \"settings.txt\",\n\n"
+					+ "the file \"settings.txt\", in other words place choose one of the rgbValues from the following list\n\n"
 					+  this);
 	}
 	
@@ -61,8 +70,19 @@ public class Alphabet
 	 */
 	public void add(Cell toAdd) throws Exception
 	{
-		if(rgbMap.put(toAdd.rgbValue, toAdd) != null || idMap.put(toAdd.id, toAdd) != null)
-			throw new Exception("ERROR THE CELL" + toAdd.id + " HAS ALREADY BEEN ADDED TO THIS ALPHABET");
+		Cell previouslyMappedCell = rgbMap.put(toAdd.rgbValue, toAdd);
+		
+		if(previouslyMappedCell != null)
+			throw new Exception( ""
+					+ "Error, the rgbValue " + toAdd.rgbValue + " for the Cell " + toAdd.id + " has already been mapped\n"
+					+ "to the Cell " + previouslyMappedCell.id + " change the rgbValue for these Cells, or\n"
+					+ "delete one of them to continue.");
+		
+		if(idMap.put(toAdd.id, toAdd) != null)
+			throw new Exception( ""
+					+ "Error, the Cell" + toAdd.id + " has already been added to your alphabet,\n"
+					+ "delete this Cell or rename it from " + toAdd.id + " to something else that has not\n"
+					+ "already been used in your alhpabet.");
 		
 		setOfCells.add(toAdd);
 	}
@@ -102,7 +122,8 @@ public class Alphabet
 		for(Cell cell : setOfCells)
 			str += cell.id + "\t" +  cell.rgbValue + "\n";
 		
-		str += "NULL" + "\t" + idMap.get("NULL").rgbValue;
+		if(idMap.containsKey("NULL"))
+			str += "NULL" + "\t" + idMap.get("NULL").rgbValue;
 		
 		return str;
 	}

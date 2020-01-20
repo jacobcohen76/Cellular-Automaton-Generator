@@ -16,6 +16,11 @@ public class Cell implements Comparable<Cell>
 	
 	private Color color;
 	
+	/**
+	 * Constructs a Cell with specified identifier and rgbValue
+	 * @param id the identifier to give this Cell
+	 * @param rgbValue the rgbValue to make this Cell represent
+	 */
 	public Cell(String id, int rgbValue)
 	{
 		this.rgbValue = rgbValue;
@@ -24,6 +29,10 @@ public class Cell implements Comparable<Cell>
 		color = new Color(rgbValue);
 	}
 	
+	/**
+	 * Gets the RGB value that the Image Generator will use to represent this Cell
+	 * @return the RGB value that the Image Generator will use to represent this Cell
+	 */
 	public int getRGB()
 	{
 		return color.getRGB();

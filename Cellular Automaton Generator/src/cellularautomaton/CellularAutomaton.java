@@ -16,10 +16,11 @@ import java.util.Iterator;
 public class CellularAutomaton implements Iterable<Row>
 {
 	private Row rows[];
-	private Dictionary dictionary;
 	
 	private int numRows;
 	private int numColumns;
+	
+	private boolean isGenerated;
 	
 	/**
 	 * constructs a new CellularAutonoma with specified starting row, row count, and rules to generate with
@@ -28,25 +29,28 @@ public class CellularAutomaton implements Iterable<Row>
 	 * @param numRows the number of Rows to make this CellularAutonoma have when generated
 	 * @param dictionary contains the information on how to generate the other Rows in this CellularAutonoma
 	 */
-	public CellularAutomaton(Row startingRow, int numRows, Dictionary dictionary)
+	public CellularAutomaton(int numRows)
 	{
 		rows = new Row[numRows];
-		rows[0] = startingRow;
-		
 		this.numRows = numRows;
-		this.numColumns = startingRow.size();
 		
-		this.dictionary = dictionary;
+		isGenerated = false;
 	}
 	
 	/**
 	 * Generates and sets all of the Rows and Cells within this
 	 * CellularAutomaton based on the provided startingRow
 	 */
-	public void generate()
+	public void generate(Row startingRow, Dictionary dictionary)
 	{
+		rows[0] = startingRow;
+		
+		this.numColumns = startingRow.size();
+		
 		for(int i = 1; i < rows.length; i++)
 			rows[i] = Row.generate(rows[i - 1], dictionary);
+		
+		isGenerated = true;
 	}
 	
 	/**
@@ -131,23 +135,29 @@ public class CellularAutomaton implements Iterable<Row>
 		return new RowIterator();
 	}
 	
+	public boolean isGenerated()
+	{
+		return isGenerated;
+	}
+	
 	/**
 	 * Creates and returns a BufferedImage based on the rgbValues of the Cells
 	 * that this CellularAutomaton is made up of.
 	 * 
 	 * @return a BufferedImage that visually represents this CellularAutomaton
+	 * @throws Exception if you try to get the Buffered Image of a CellularAutomaton
+	 * that has not been generated yet
 	 */
-	public BufferedImage getBufferedImage()
+	public BufferedImage getBufferedImage() throws Exception
 	{
+		if(this.isGenerated() == false)
+			throw new Exception("Error, this CellularAutomaton (" + super.toString() + ") has not been generated yet");
+		
 		BufferedImage image = new BufferedImage(numColumns, numRows, BufferedImage.TYPE_INT_ARGB);
 		
-		for(int i = 0; i < image.getWidth(); i++)
-		{
-			for(int j = 0; j < image.getHeight(); j++)
-			{
-				image.setRGB(i, j, get(j, i).getRGB());
-			}
-		}
+		for(int row = 0; row < image.getWidth(); row++)
+			for(int col = 0; col < image.getHeight(); col++)
+				image.setRGB(row, col, get(col, row).getRGB());
 		
 		return image;
 	}

@@ -89,10 +89,8 @@ public class Row implements Iterable<Cell[]>
 	private static void replaceNULL(Cell[] pattern, Cell newNULL)
 	{
 		for(int i = 0; i < pattern.length; i++)
-		{
 			if(pattern[i] == null)
 				pattern[i] = newNULL;
-		}
 	}
 	
 	/**
