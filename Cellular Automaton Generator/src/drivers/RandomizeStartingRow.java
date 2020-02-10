@@ -3,16 +3,7 @@ package drivers;
 import java.io.File;
 import java.net.URISyntaxException;
 
-import cellularautomaton.CellularAutomaton;
-
-/**
- * class GenerateImage to act as a driver for the runnable Jar that when executed
- * will get the information from text files and generate the CellularAutomaton
- * based on user chosen specifications to the output folder. 
- * 
- * @author Jacob Cohen
- */
-public class GenerateImage
+public class RandomizeStartingRow
 {
 	private static Settings settings;
 	
@@ -20,21 +11,13 @@ public class GenerateImage
 	{
 		try
 		{
-			String rootDirectory = getJARdirectory();
+			String rootDirectory = getJARdirectory();		
 			String outputFolder = Global.outputFolderName;
 			
 			settings = new Settings(rootDirectory, outputFolder);
-			
-			settings.setMappedRules();
-			settings.setStartingRow();
-			
-			CellularAutomaton automaton = settings.getCellularAutomaton();
-			
-			settings.saveImage(automaton.getBufferedImage());
-			
-			settings.shutdown();
+			settings.randomizeStartingRow();
 		}
-		catch (Exception ex)
+		catch(Exception ex)
 		{
 			settings.updateErrorLog(ex);
 		}

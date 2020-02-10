@@ -5,10 +5,13 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.imageio.ImageIO;
 
@@ -31,6 +34,7 @@ public class Settings
 	private static final String rulesFileName = "rules.txt";
 	private static final String startingRowFileName = "row.txt";
 	private static final String errorlogFileName = "errorlog.txt";
+	private static final String numberFileName = "number.txt";
 	
 	private String rootDirectory;
 	private String outputFolder;
@@ -39,6 +43,7 @@ public class Settings
 	private File rulesTXT;
 	private File rowTXT;
 	private File errorlogTXT;
+	private File numberTXT;
 	
 	private static final String defaultAlphabet =
 			"W = FFFFFF\r\n" +
@@ -47,16 +52,26 @@ public class Settings
 	private static final String defaultSettings =
 			"ruleSize   = 3\r\n" + 
 			"NULLrgbVal = FFFFFF\r\n" +
-			"numRows    = 100";
+			"numRows    = 1000\r\n" +
+			"numThreads = 1\r\n" +
+			"randomizedRowSize = 1000";
 	
-	public Dictionary dictionary;
+	private static final String defaultNumber = "0";
+	
 	public Alphabet alphabet;
 	
 	public int ruleSize;
 	public int nullRGBval;
-	public int numRows; 
+	public int numThreads;
+	public int randomizedRowSize;
 	
-	public Row startingRow;
+	public BigInteger number;
+	
+	public volatile Dictionary dictionary;
+	public volatile int numRows; 
+	public volatile Row startingRow;
+	
+	private ExecutorService threadManager;
 	
 	public Settings(String rootDirectory, String outputFolder)
 	{
@@ -69,6 +84,21 @@ public class Settings
 	{
 		String fileName = (new Timestamp(System.currentTimeMillis())).toString().replace('.', '-').replace(':', '.') + ".png";
 		saveImage(image, fileName);
+	}
+	
+	public void randomizeStartingRow()
+	{
+		String str = "";
+		for(int i = 0; i < randomizedRowSize; i++)
+		{
+			str += alphabet.random() + " ";
+		}
+		try {
+			write(str, rowTXT);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			updateErrorLog(e);
+		}
 	}
 	
 	public void saveImage(BufferedImage image, String fileName)
@@ -88,6 +118,11 @@ public class Settings
 		}
 	}
 	
+	public Dictionary getClonedDictionary()
+	{
+		return dictionary.clone();
+	}
+	
 	private void initialize()
 	{
 		//initializes files to be used for this class
@@ -96,6 +131,7 @@ public class Settings
 		rulesTXT = new File(rootDirectory + rulesFileName);
 		rowTXT = new File(rootDirectory + startingRowFileName);
 		errorlogTXT = new File(rootDirectory + errorlogFileName);
+		numberTXT = new File(rootDirectory + numberFileName);
 		
 		startingRow = null;
 		
@@ -110,8 +146,12 @@ public class Settings
 			//gets and sets data from text files
 			getSettings();
 			
+			threadManager = Executors.newFixedThreadPool(numThreads);
+			
 			alphabet = getAlphabet();
 			alphabet.setNULL(nullRGBval);
+			
+			number = getBigInteger();
 			
 			dictionary = new Dictionary(alphabet, ruleSize);
 		}
@@ -159,6 +199,7 @@ public class Settings
 		catch (Exception e) {}
 		
 		//terminates the program
+		threadManager.shutdown();
 		System.exit(0);
 	}
 	
@@ -239,6 +280,11 @@ public class Settings
 		return new Row(listArray, ruleSize);
 	}
 	
+	public void shutdown()
+	{
+		threadManager.shutdown();
+	}
+	
 	public void setStartingRow()
 	{
 		try
@@ -249,6 +295,25 @@ public class Settings
 		{
 			updateErrorLog(ex);
 		}
+	}
+	
+	public BigInteger getNumber()
+	{
+		return number;
+	}
+	
+	private BigInteger getBigInteger() throws Exception
+	{
+		if(!numberTXT.exists())
+		{
+			numberTXT.createNewFile();
+			write(defaultNumber, numberTXT);
+		}
+		
+		Scanner scan = new Scanner(numberTXT);
+		number = scan.nextBigInteger();
+		scan.close();
+		return number;
 	}
 	
 	/**
@@ -284,6 +349,17 @@ public class Settings
 			scan.next();
 			
 			numRows = scan.nextInt();
+			
+			//skip past variable name and '='
+			scan.next();
+			scan.next();
+			
+			numThreads = scan.nextInt();
+			
+			scan.next();
+			scan.next();
+			
+			randomizedRowSize = scan.nextInt();
 			
 			scan.close();
 		}
@@ -358,5 +434,31 @@ public class Settings
 		}
 		
 		return numRules;
+	}
+	
+	public void generate(Dictionary dictionary, String filename)
+	{
+		threadManager.execute(new GeneratorThread(dictionary, filename));
+	}
+	
+	private class GeneratorThread implements Runnable
+	{
+		private Dictionary dictionary;
+		private String filename;
+		
+		public GeneratorThread(Dictionary dictionary, String filename)
+		{
+			this.dictionary = dictionary;
+			this.filename = filename;
+		}
+		
+		public void run()
+		{
+			try {
+				CellularAutomaton automaton = new CellularAutomaton(numRows);
+				automaton.generate(startingRow, dictionary);
+				saveImage(automaton.getBufferedImage(), filename);
+			} catch (Exception e) {}
+		}
 	}
 }

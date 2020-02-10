@@ -13,7 +13,7 @@ import java.util.Set;
  * 
  * @author Jacob Cohen
  */
-public class Dictionary
+public class Dictionary implements Cloneable
 {
 	/**
 	 * Contains the set of all possible Cells that can appear in rules for this Dictionary
@@ -81,6 +81,15 @@ public class Dictionary
 			key += pattern[i].id + " ";
 		
 		return key;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Dictionary clone()
+	{
+		Dictionary dictionary = new Dictionary(alphabet, patternSize);
+		dictionary.outputMap = (HashMap<String, Cell>) outputMap.clone();
+		dictionary.keyList =  (ArrayList<String>) keyList.clone();
+		return dictionary;
 	}
 	
 	/**

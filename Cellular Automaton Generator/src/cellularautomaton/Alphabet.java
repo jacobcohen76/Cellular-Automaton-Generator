@@ -2,6 +2,8 @@ package cellularautomaton;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
+import java.util.Set;
 
 /**
  * class Alphabet used to define and map identifiers to Cells with specified rgbValues
@@ -14,6 +16,8 @@ public class Alphabet
 	 * to store the set of all the Cells contained within this Alphabet
 	 */
 	private ArrayList<Cell> setOfCells;
+	
+	private static final Random rand = new Random();
 	
 	/**
 	 * to map an rgbValue to a Cell
@@ -39,6 +43,20 @@ public class Alphabet
 	public int numCells()
 	{
 		return setOfCells.size();
+	}
+	
+	private ArrayList<String> nonNULLCells = null;
+	public String random()
+	{
+		if(nonNULLCells == null)
+		{
+			nonNULLCells = new ArrayList<String>();
+			Set<String> ids = getIDset();
+			for(String id : ids)
+				if(id.contentEquals("NULL") == false)
+					nonNULLCells.add(id);
+		}
+		return nonNULLCells.get(rand.nextInt(nonNULLCells.size()));
 	}
 	
 	/**
@@ -96,6 +114,13 @@ public class Alphabet
 	public Cell get(String id)
 	{
 		return idMap.get(id);
+	}
+	
+	public Set<String> getIDset()
+	{
+		Set<String> idset = idMap.keySet();
+		idset.remove("NULL");
+		return idset;
 	}
 	
 	/**

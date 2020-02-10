@@ -3,11 +3,13 @@ package drivers;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Random;
 
 import cellularautomaton.Cell;
 import cellularautomaton.Dictionary;
+import cellularautomaton.Row;
 
-public class GenerateAll
+public class GenerateRandom
 {
 	private static Settings settings;
 	
@@ -22,7 +24,6 @@ public class GenerateAll
 			
 			settings.generateRules();
 			settings.setMappedRules();
-			settings.setStartingRow();
 			
 			ArrayList<Cell> setOfCells = settings.alphabet.getSetOfCells();
 			
@@ -30,17 +31,23 @@ public class GenerateAll
 			int ruleSize = settings.ruleSize;
 			
 			int numOutputs = (int) Math.pow(radix, ruleSize);
-			long numPossibleOutputMaps = (long) Math.pow(radix, numOutputs);
 			
 			ArrayList<Integer> radixBasedRuleSet = new ArrayList<Integer>(numOutputs);
 			for(int i = 0; i < numOutputs; i++)
 				radixBasedRuleSet.add(0);
 			
-			for(long i = 0; i < numPossibleOutputMaps; i++)
+			Random rand = new Random();
+			for(int i = 0; i < radixBasedRuleSet.size(); i++)
+				radixBasedRuleSet.set(i, rand.nextInt(radix));
+			
+			Cell[] row = new Cell[settings.randomizedRowSize];
+			for(int i = 0; i < row.length; i++)
 			{
-				rebase(i, radix, radixBasedRuleSet);
-				generate(radixBasedRuleSet, i);
+				row[i] = settings.alphabet.get(settings.alphabet.random());
 			}
+			
+			settings.startingRow = new Row(row, settings.ruleSize);
+			generate(radixBasedRuleSet, "random");
 			
 			settings.shutdown();
 		}
@@ -49,31 +56,12 @@ public class GenerateAll
 			settings.updateErrorLog(ex);
 		}
 	}
-	
-	private static void rebase(long n, int radix, ArrayList<Integer> abnormalRadixBasedNumber)
-	{
-		reset(abnormalRadixBasedNumber);
 		
-		int i = 0;
-		while(n > 0)
-		{
-			abnormalRadixBasedNumber.set(i, (int) (n % radix));
-			n /= radix;
-			i++;
-		}
-	}
-	
-	private static void reset(ArrayList<Integer> abnormalRadixBasedNumber)
-	{
-		for(int i = 0; i < abnormalRadixBasedNumber.size(); i++)
-			abnormalRadixBasedNumber.set(i, 0);
-	}
-		
-	private static void generate(ArrayList<Integer> ruleNumber, long base10) throws Exception
+	private static void generate(ArrayList<Integer> ruleNumber, String filename) throws Exception
 	{
 		Dictionary dictionary = settings.getClonedDictionary();
 		dictionary.remap(ruleNumber);
-		settings.generate(dictionary, base10 + ".png");
+		settings.generate(dictionary, filename + ".png");
 	}
 	
 	/**

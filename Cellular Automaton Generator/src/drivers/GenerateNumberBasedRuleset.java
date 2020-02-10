@@ -1,13 +1,14 @@
 package drivers;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import cellularautomaton.Cell;
 import cellularautomaton.Dictionary;
 
-public class GenerateAll
+public class GenerateNumberBasedRuleset
 {
 	private static Settings settings;
 	
@@ -30,17 +31,15 @@ public class GenerateAll
 			int ruleSize = settings.ruleSize;
 			
 			int numOutputs = (int) Math.pow(radix, ruleSize);
-			long numPossibleOutputMaps = (long) Math.pow(radix, numOutputs);
 			
 			ArrayList<Integer> radixBasedRuleSet = new ArrayList<Integer>(numOutputs);
 			for(int i = 0; i < numOutputs; i++)
 				radixBasedRuleSet.add(0);
 			
-			for(long i = 0; i < numPossibleOutputMaps; i++)
-			{
-				rebase(i, radix, radixBasedRuleSet);
-				generate(radixBasedRuleSet, i);
-			}
+			BigInteger number = settings.getNumber();
+			
+			rebase(number, new BigInteger(Integer.toString(radix)), radixBasedRuleSet);
+			generate(radixBasedRuleSet, number);
 			
 			settings.shutdown();
 		}
@@ -50,15 +49,15 @@ public class GenerateAll
 		}
 	}
 	
-	private static void rebase(long n, int radix, ArrayList<Integer> abnormalRadixBasedNumber)
+	private static void rebase(BigInteger n, BigInteger radix, ArrayList<Integer> abnormalRadixBasedNumber)
 	{
 		reset(abnormalRadixBasedNumber);
 		
 		int i = 0;
-		while(n > 0)
+		while(n.compareTo(BigInteger.ZERO) > 0)
 		{
-			abnormalRadixBasedNumber.set(i, (int) (n % radix));
-			n /= radix;
+			abnormalRadixBasedNumber.set(i, n.mod(radix).intValue());
+			n = n.divide(radix);
 			i++;
 		}
 	}
@@ -69,11 +68,17 @@ public class GenerateAll
 			abnormalRadixBasedNumber.set(i, 0);
 	}
 		
-	private static void generate(ArrayList<Integer> ruleNumber, long base10) throws Exception
+	private static void generate(ArrayList<Integer> ruleNumber, BigInteger base10) throws Exception
 	{
 		Dictionary dictionary = settings.getClonedDictionary();
 		dictionary.remap(ruleNumber);
-		settings.generate(dictionary, base10 + ".png");
+		
+		String filename = base10.toString();
+		if(base10.toString().length() > 200)
+			filename = filename.substring(0, 200);
+		filename += ".png";
+		
+		settings.generate(dictionary, filename);
 	}
 	
 	/**
